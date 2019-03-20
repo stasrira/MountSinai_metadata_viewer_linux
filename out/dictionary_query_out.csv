@@ -1,0 +1,82 @@
+dictionary_id,name,description,label,type,code,value
+1,manifestID,Identifier for the manifest,Manifest ID,varchar,,
+1,Protocol,Protocol in which the procedures for sample collection were outlined.,Protocol,enum,1,Phase 1A
+1,Protocol,Protocol in which the procedures for sample collection were outlined.,Protocol,enum,2,Phase 2B
+1,Protocol,Protocol in which the procedures for sample collection were outlined.,Protocol,enum,3,Pilot
+1,siteName,The site where the samples were collected. One of three PASS Iowa, Florida, or Joslin.,Site,enum,910,Joslin
+1,siteName,The site where the samples were collected. One of three PASS Iowa, Florida, or Joslin.,Site,enum,930,University of Florida
+1,siteName,The site where the samples were collected. One of three PASS Iowa, Florida, or Joslin.,Site,enum,940,University of Iowa
+1,species,In the Pilot Joslin and Florida sites used the Fischer 344xBrown Norway crossbreed and Iowa used the Fischer 344,Species,enum,1,Fischer 344
+1,species,In the Pilot Joslin and Florida sites used the Fischer 344xBrown Norway crossbreed and Iowa used the Fischer 344,Species,enum,2,Fischer 344 X Brown Norway
+1,pid,Unique, randomly generated 8 digit numeric identifier used in linkage to phenotypic data,Animal Participant ID,numeric,,
+1,vialLabel,Unique 11 digit numeric identifier of a sample vial made up of the BID, Timepoint, Sample Type, and Aliquot number,Vial Label,numeric,,
+1,bid,Unique 5 digit numeric identifier of all samples collected for an acute test/sample collection period. All samples collected during that period will have the same BID.,Biospecimen ID,numeric,,
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,30,Rat PaxGene RNA
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,31,Rat Plasma
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,32,Rat Packed Cells
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,33,Rat Hippocampus
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,34,Rat Cortex
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,35,Rat Hypothalmus
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,36,Rat Gastrocnemius
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,37,Rat Vastus Lateralis
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,38,Rat Tibia
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,39,Rat Heart
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,40,Rat Kidney
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,41,Rat Adrenals
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,42,Rat Colon
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,43,Rat Spleen
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,44,Rat Testes
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,45,Rat Ovaries
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,46,Rat Brown Adipose
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,47,Rat White Adipose
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,48,Rat Aorta
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,49,Rat Lung
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,50,Rat Small Intestine
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,51,Rat Liver
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,52,Rat Hippocampus Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,53,Rat Cortex Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,54,Rat Hypothalmus Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,55,Rat Gastrocnemius Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,56,Rat Vastus Lateralis Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,57,Rat Tibia Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,58,Rat Heart Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,59,Rat Kidney Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,60,Rat Adrenal Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,61,Rat Colon Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,62,Rat Spleen Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,63,Rat Testes Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,64,Rat Ovaries Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,65,Rat Aorta Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,66,Rat Lung Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,67,Rat Small Intestine Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,68,Rat Liver Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,69,Rat Brown Adipose Powder
+1,sampleTypeCode,2 digit code for the type of tissue in the sample to be used for analysis,Sample Type,enum,70,Rat White Adipose Powder
+1,ageGroup,Age group for the animal,Age Group,enum,1,6 months
+1,ageGroup,Age group for the animal,Age Group,enum,2,18 months
+1,ageAtSacrifice,Age at which the animal was sacrificed. Sacrifice Date - Birth Date = Age at Sacrifice in months,Age at Sacrifice in months,numeric,,
+1,sex,Sex of the Animal,Sex,enum,1,Female
+1,sex,Sex of the Animal,Sex,enum,2,Male
+1,weight,Weight of the animal at the time of sacrifice in grams. Please note that weights at other time points are included in phenotypic data.,Weight at Sacrifice,numeric,,
+1,batch,Phase 1a: The batch number where this sample was collected (identifies unique days within combinations of site and age. Males and females with the same sacrifice batch codes, within the same site and ,Animal Sacrifice Batch,numeric,1,Shipment Batch 1; Sacrifice Day 1
+1,batch,Phase 1a: The batch number where this sample was collected (identifies unique days within combinations of site and age. Males and females with the same sacrifice batch codes, within the same site and ,Animal Sacrifice Batch,numeric,2,Shipment Batch 1; Sacrifice Day 2
+1,batch,Phase 1a: The batch number where this sample was collected (identifies unique days within combinations of site and age. Males and females with the same sacrifice batch codes, within the same site and ,Animal Sacrifice Batch,numeric,3,Shipment Batch 1; Sacrifice Day 3
+1,batch,Phase 1a: The batch number where this sample was collected (identifies unique days within combinations of site and age. Males and females with the same sacrifice batch codes, within the same site and ,Animal Sacrifice Batch,numeric,4,Shipment Batch 2; Sacrifice Day 2
+1,batch,Phase 1a: The batch number where this sample was collected (identifies unique days within combinations of site and age. Males and females with the same sacrifice batch codes, within the same site and ,Animal Sacrifice Batch,numeric,5,Shipment Batch 2; Sacrifice Day 3
+1,intervention,For Phase 1a the exercise group is defined by those who complete the acute exercise test. For Phase 1b the exercise group is defined by those who complete exercise training.,Intervention,enum,1,Exercise (Phase 1a)
+1,intervention,For Phase 1a the exercise group is defined by those who complete the acute exercise test. For Phase 1b the exercise group is defined by those who complete exercise training.,Intervention,enum,2,Training (Phase 1b)
+1,intervention,For Phase 1a the exercise group is defined by those who complete the acute exercise test. For Phase 1b the exercise group is defined by those who complete exercise training.,Intervention,enum,3,Control
+1,sacrificeTime,For Phase 1a Sacrifice Time refers to the number of hours prior to sacrifice (post-acute test for the exercise group). For Phase 1b Sacrifice Time refers to the number of weeks of training.,Sacrifice Time,enum,1,Immediate Post Exercise (Phase 1a)
+1,sacrificeTime,For Phase 1a Sacrifice Time refers to the number of hours prior to sacrifice (post-acute test for the exercise group). For Phase 1b Sacrifice Time refers to the number of weeks of training.,Sacrifice Time,enum,2,0.5 hour (Phase 1a)
+1,sacrificeTime,For Phase 1a Sacrifice Time refers to the number of hours prior to sacrifice (post-acute test for the exercise group). For Phase 1b Sacrifice Time refers to the number of weeks of training.,Sacrifice Time,enum,3,1 hour (Phase 1a)
+1,sacrificeTime,For Phase 1a Sacrifice Time refers to the number of hours prior to sacrifice (post-acute test for the exercise group). For Phase 1b Sacrifice Time refers to the number of weeks of training.,Sacrifice Time,enum,4,4 hour (Phase 1a)
+1,sacrificeTime,For Phase 1a Sacrifice Time refers to the number of hours prior to sacrifice (post-acute test for the exercise group). For Phase 1b Sacrifice Time refers to the number of weeks of training.,Sacrifice Time,enum,5,7 hour (Phase 1a)
+1,sacrificeTime,For Phase 1a Sacrifice Time refers to the number of hours prior to sacrifice (post-acute test for the exercise group). For Phase 1b Sacrifice Time refers to the number of weeks of training.,Sacrifice Time,enum,6,24 hour (Phase 1a)
+1,sacrificeTime,For Phase 1a Sacrifice Time refers to the number of hours prior to sacrifice (post-acute test for the exercise group). For Phase 1b Sacrifice Time refers to the number of weeks of training.,Sacrifice Time,enum,7,48 hour (Phase 1a)
+1,sacrificeTime,For Phase 1a Sacrifice Time refers to the number of hours prior to sacrifice (post-acute test for the exercise group). For Phase 1b Sacrifice Time refers to the number of weeks of training.,Sacrifice Time,enum,8,1 week of training (Phase 1b)
+1,sacrificeTime,For Phase 1a Sacrifice Time refers to the number of hours prior to sacrifice (post-acute test for the exercise group). For Phase 1b Sacrifice Time refers to the number of weeks of training.,Sacrifice Time,enum,9,2 weeks of training (Phase 1b)
+1,sacrificeTime,For Phase 1a Sacrifice Time refers to the number of hours prior to sacrifice (post-acute test for the exercise group). For Phase 1b Sacrifice Time refers to the number of weeks of training.,Sacrifice Time,enum,10,4 weeks of training (Phase 1b)
+1,sacrificeTime,For Phase 1a Sacrifice Time refers to the number of hours prior to sacrifice (post-acute test for the exercise group). For Phase 1b Sacrifice Time refers to the number of weeks of training.,Sacrifice Time,enum,11,8 weeks of training (Phase 1b)
+1,barcode,Unique numeric identifier for the 2D Barcode from the micronic vials,2D Barcode,numeric,,
+
+(79 rows affected)

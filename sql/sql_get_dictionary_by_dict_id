@@ -1,0 +1,1 @@
+EXEC usp_get_dictionary @dict_id = 1

@@ -1,0 +1,1 @@
+sqlcmd -S 10.160.20.65,51261 -U mt_internal_dbowner -P se@lf0nDB0ner -d dw_motrpac -Q "Select * from vw_get_study_stats"
