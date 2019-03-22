@@ -6,8 +6,8 @@ _VERSION="`basename ${0}` (version: $_VER_NUM)"
 
 #define main variables
 _S="10.160.20.65,51261" #Test instance of SQL Server 2016
-_U="mt_internal_dbowner" #"mt_internal_user"	#sql server user
-_P="se@lf0nDB0ner" #"se@lf0n1nt3rn@l"	#password
+_U="mt_internal_user" #"mt_internal_user"	#sql server user
+_P="se@lf0n1nt3rn@l" #"se@lf0n1nt3rn@l"	#password
 _D=dw_motrpac			#database name
 
 EXPECTED_ARGS="-r -i -f"
