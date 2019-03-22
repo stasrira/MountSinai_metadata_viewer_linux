@@ -1,8 +1,0 @@
-#generate sql extract file; sql statement is stored in file passed in the "-i" parameter; output is saved to a temp file "tmp_metadata_query_out.csv"
-sqlcmd -S 10.160.20.65,51261 -U mt_internal_dbowner -P se@lf0nDB0ner -d dw_motrpac -i sql/sql_get_metadata_by_study_id -o out/tmp_metadata_query_out.csv -W -w 4000 -s ,
-
-#remove second line which is just a row filled with dashes (--------------) to separate header and body of the file and output the result into a final file "metadata_query_out.csv"
-sed '2d' out/tmp_metadata_query_out.csv > out/metadata_query_out.csv
-
-#remove temp file
-rm out/tmp_metadata_query_out.csv

@@ -1,0 +1,136 @@
+#!/bin/sh
+
+#version of the script
+_VER_NUM=1.00
+_VERSION="`basename ${0}` (version: $_VER_NUM)" 
+
+#define main variables
+_S="10.160.20.65,51261" #Test instance of SQL Server 2016
+_U="mt_internal_dbowner" #"mt_internal_user"	#sql server user
+_P="se@lf0nDB0ner" #"se@lf0n1nt3rn@l"	#password
+_D=dw_motrpac			#database name
+
+EXPECTED_ARGS="-r -i -f"
+_HELP="\n$_VERSION
+	\nPrerequisites: 'sqlcmd' application is required to run this script. To install 'sqlcmd', follow directions on this site: \nhttps://docs.microsoft.com/en-us/sql/linux/sql-server-linux-setup-tools?view=sql-server-2017
+	\n\nParameters usage: 
+		\n\t[-r report identifier (optional) - expected values: metadata|dictionary|studystats (default: studystats)] 
+		\n\t[-i study or dictionary id (optional): numeric (default: 1) 
+		\n\t\tthis parameter is required for 'metadata' and 'dictionary' reports (refer to '-r' parameter); 'studystats' does not require this parameter]
+		\n\t[-f format (optional): sets delimiter for the output (default value is comma); accepts one character only
+		\n\t\tIf this parameter is omitted, native SQL Server output will be used]"
+
+_NEXT="" #variable to handle name of the next variable being assigned
+_PR="studystats"	#default value for query name
+_PI="1"				#default value for id
+_PF="" 				#default value for a delimiter; if "-f" parameter is provided, comma "," will be set as default
+
+#echo $*
+#for PRM in $*
+#do
+#	echo $PRM
+#done
+#echo $#
+
+#output help info
+if [ "${1}" == "?" -o "${1}" == "help" -o "${1}" == "-help" ]
+then
+  echo -e $_HELP
+exit 0
+fi
+
+#output version info
+if [ "${1}" == "-v" -o "${1}" == "-version" ]
+then
+  echo $_VERSION
+exit 0
+fi
+
+#analyze received parameters
+for PRM in $*
+do
+  #check if the provided named parameter is expected
+  if [ ${PRM:0:1} == "-" ] #check if this is the named parameter
+  then #echo "named parameter $PRM"; fi
+	  if [[ ! " $EXPECTED_ARGS " =~ .*\ $PRM\ .* ]]
+	  then
+		echo "Incorrect argument '$PRM' was supplied. Check below for the help information."
+		echo -e $_HELP
+		exit 0
+	  fi
+  fi
+
+  #echo "Got into loop"
+  case $PRM in
+    -r) _NEXT="_PR"
+    ;;
+    -i) _NEXT="_PI"
+    ;;
+    -f) _NEXT="_PF"
+	    _PF="," #default value; if "-f" parameter is provided, the default value is set to make sure that it is in place even if user did not specify the desired delimiter
+    ;;
+    *)
+    #echo "------------ELSE of 1st Loop" 
+    #echo "_NEXT=" $_NEXT
+
+    case $_NEXT in
+           _PR) _PR=$PRM
+             ;;
+           _PI) _PI=$PRM
+             ;;
+           _PF) _PF=$PRM
+             ;;
+           *) 
+             #echo "------------ELSE of 2nd Loop"             
+             _NEXT="" #reset variable
+             ;;
+        esac 
+    ;;
+  esac
+done
+
+#echo "_PR =" $_PR #for testing only
+#echo "_PI =" $_PI #for testing only
+#echo "_PF =" $_PF #for testing only
+
+#possible SQL scripts (metadata|dictionary|studystats)
+_QR=""
+_Q_METADATA="EXEC usp_get_metadata @study_id = {{study_id}};"
+_Q_DICTIONARY="EXEC usp_get_dictionary @dict_id = {{study_id}};"
+_Q_STUDYSTATS="Set nocount on; Select * from vw_get_study_stats;"
+
+_PL_HLDR_STUDYID="{{study_id}}"
+
+#controls format of the output
+if [ "$_PF" != "" ]
+then
+  _DELIM_FMT="-W -w 4000 -s $_PF"
+else
+  _DELIM_FMT=""
+fi
+
+#echo "_DELIM_FMT = " $_DELIM_FMT #for testing only
+
+case $_PR in
+   metadata) _QR=$_Q_METADATA
+	 ;;
+   dictionary) _QR=$_Q_DICTIONARY
+	 ;;
+   studystats) _QR=$_Q_STUDYSTATS
+	 ;;
+   *) 
+	 #report parameter was not recognized             
+	 echo "Value of the '-r' argument ('$_PR') was not recognized. Aborting execution. Check below for the help information."
+	 echo -e $_HELP
+	 exit 0
+	 ;;
+esac 
+
+#update _QR variable by substituting study_id place holder with the actual study_id supplied as a parameter
+_QR=${_QR//$_PL_HLDR_STUDYID/$_PI}
+
+#echo "_QR = " $_QR #for testing only
+#exit 0 #for testing only
+
+sqlcmd -S $_S -U $_U -P $_P -d $_D -Q "$_QR" $_DELIM_FMT | sed '2d' # -W -w 4000 -s , #-o out/tmp_metadata_query_out.csv
+
