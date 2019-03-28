@@ -1,7 +1,10 @@
 #!/bin/sh
+set -e
+set -u
+set -o pipefail
 
 #version of the script
-_VER_NUM=1.00
+_VER_NUM=1.01
 _VERSION="`basename ${0}` (version: $_VER_NUM)" 
 
 #define main variables
@@ -14,13 +17,17 @@ EXPECTED_ARGS="-r -i -f"
 _HELP="\n$_VERSION
 	\nPrerequisites: 'sqlcmd' application is required to run this script. To install 'sqlcmd', follow directions on this site: \nhttps://docs.microsoft.com/en-us/sql/linux/sql-server-linux-setup-tools?view=sql-server-2017
 	\n\narguments usage: 
+		\n\t[-v: report the version]
+		\n\t[-h: help]
+		\n\t[-d: debug version]
 		\n\t[-r report identifier (optional) - expected values: metadata|dictionary|studystats (default: studystats)] 
 		\n\t[-i study or dictionary id (optional): numeric (default: 1) 
 		\n\t\tthis argument is required for 'metadata' and 'dictionary' reports (refer to '-r' argument); 'studystats' does not require this argument]
 		\n\t[-f format (optional): sets delimiter for the output (default value is comma); accepts one character only
 		\n\t\tIf this argument is omitted, native SQL Server output will be used]"
 
-_NEXT="" #variable to handle name of the next variable being assigned
+_PD="0"
+#_NEXT="" #variable to handle name of the next variable being assigned
 _PR="studystats"	#default value for query name
 _PI="1"				#default value for id
 _PF="" 				#default value for a delimiter; if "-f" argument is provided, comma "," will be set as default
@@ -32,66 +39,29 @@ _PF="" 				#default value for a delimiter; if "-f" argument is provided, comma "
 #done
 #echo $#
 
-#output help info
-if [ "${1}" == "?" -o "${1}" == "help" -o "${1}" == "-help" ]
-then
-  echo -e $_HELP
-exit 0
-fi
-
-#output version info
-if [ "${1}" == "-v" -o "${1}" == "-version" ]
-then
-  echo $_VERSION
-exit 0
-fi
-
-#analyze received arguments
-for PRM in $*
+while getopts r:i:f:hvd o
 do
-  #check if the provided named argument is expected
-  if [ ${PRM:0:1} == "-" ] #check if this is the named argument
-  then #echo "named argument $PRM"; fi
-	  if [[ ! " $EXPECTED_ARGS " =~ .*\ $PRM\ .* ]]
-	  then
-		echo "Incorrect argument '$PRM' was supplied. Check below for the help information."
-		echo -e $_HELP
-		exit 0
-	  fi
-  fi
-
-  #echo "Got into loop"
-  case $PRM in
-    -r) _NEXT="_PR"
-    ;;
-    -i) _NEXT="_PI"
-    ;;
-    -f) _NEXT="_PF"
-	    _PF="," #default value; if "-f" argument is provided, the default value is set to make sure that it is in place even if user did not specify the desired delimiter
-    ;;
-    *)
-    #echo "------------ELSE of 1st Loop" 
-    #echo "_NEXT=" $_NEXT
-
-    case $_NEXT in
-           _PR) _PR=$PRM
-             ;;
-           _PI) _PI=$PRM
-             ;;
-           _PF) _PF=$PRM
-             ;;
-           *) 
-             #echo "------------ELSE of 2nd Loop"             
-             _NEXT="" #reset variable
-             ;;
-        esac 
-    ;;
-  esac
+    case "$o" in
+	r) _PR="$OPTARG";;
+	i) _PI="$OPTARG";;
+	f) _PF="$OPTARG";;
+	d) _PD="1";;
+	v) echo -e $_VERSION
+	   exit 0;;
+	h) echo -e $_HELP
+	   exit 0;;
+	*) #echo "$0: invalid option -$o" >&2
+	   echo -e $_HELP
+	   exit 1;;
+    esac
 done
 
-#echo "_PR =" $_PR #for testing only
-#echo "_PI =" $_PI #for testing only
-#echo "_PF =" $_PF #for testing only
+#output values of arguments in debug mode
+if [ "$_PD" == "1" ]; then
+    echo "_PR = " $_PR
+    echo "_PI = " $_PI
+    echo "_PF = " $_PF
+fi
 
 #possible SQL scripts (metadata|dictionary|studystats)
 _QR=""
@@ -131,8 +101,10 @@ esac
 #update _QR variable by substituting study_id place holder with the actual study_id supplied as a argument
 _QR=${_QR//$_PL_HLDR_STUDYID/$_PI}
 
-#echo "_QR = " $_QR #for testing only
-#exit 0 #for testing only
+#output value of _QR in debug mode
+if [ "$_PD" == "1" ]; then
+    echo "_QR = " $_QR
+fi
 
 _SQLCMD='sqlcmd -S $_S -U $_U -P $_P -d $_D -Q "$_QR" $_DELIM_FMT'  # -W -w 4000 -s , #-o out/tmp_metadata_query_out.csv
 #echo $_SQLCMD #for testing only
