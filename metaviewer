@@ -1,10 +1,7 @@
 #!/bin/sh
-set -e
-set -u
-set -o pipefail
 
 #version of the script
-_VER_NUM=1.01
+_VER_NUM=1.02
 _VERSION="`basename ${0}` (version: $_VER_NUM)" 
 
 #define main variables
@@ -13,7 +10,7 @@ _U="mt_internal_user" #"mt_internal_user"	#sql server user
 _P="se@lf0n1nt3rn@l" #"se@lf0n1nt3rn@l"	#password
 _D=dw_motrpac			#database name
 
-EXPECTED_ARGS="-r -i -f"
+EXPECTED_ARGS="-r -i -f -h -v -d"
 _HELP="\n$_VERSION
 	\nPrerequisites: 'sqlcmd' application is required to run this script. To install 'sqlcmd', follow directions on this site: \nhttps://docs.microsoft.com/en-us/sql/linux/sql-server-linux-setup-tools?view=sql-server-2017
 	\n\narguments usage: 
@@ -26,11 +23,13 @@ _HELP="\n$_VERSION
 		\n\t[-f format (optional): sets delimiter for the output (default value is comma); accepts one character only
 		\n\t\tIf this argument is omitted, native SQL Server output will be used]"
 
-_PD="0"
-#_NEXT="" #variable to handle name of the next variable being assigned
+_NEXT="" #variable to handle name of the next variable being assigned
 _PR="studystats"	#default value for query name
 _PI="1"				#default value for id
 _PF="" 				#default value for a delimiter; if "-f" argument is provided, comma "," will be set as default
+
+#echo $2
+
 
 #echo $*
 #for PRM in $*
@@ -38,34 +37,64 @@ _PF="" 				#default value for a delimiter; if "-f" argument is provided, comma "
 #	echo $PRM
 #done
 #echo $#
+#for PRM in $@
+#do
+#	echo "${PRM}" #$PRM
+#done
 
-while getopts r:i:f:hvd o
+
+#analyze received arguments
+for PRM in $@
 do
-    case "$o" in
-	r) _PR="$OPTARG";;
-	i) _PI="$OPTARG";;
-	f) _PF="$OPTARG";;
-	d) _PD="1";;
-	v) echo -e $_VERSION
-	   exit 0;;
-	h) echo -e $_HELP
-	   exit 0;;
-	*) #echo "$0: invalid option -$o" >&2
-	   echo -e $_HELP
-	   exit 1;;
-    esac
+  #check if the provided named argument is expected
+  if [ ${PRM:0:1} == "-" ] #check if this is the named argument
+  then #echo "named argument $PRM"; fi
+	  if [[ ! " $EXPECTED_ARGS " =~ .*\ $PRM\ .* ]]
+	  then
+		echo "Incorrect argument '$PRM' was supplied. Check below for the help information."
+		echo -e $_HELP
+		exit 0
+	  fi
+  fi
+  
+  case "$PRM" in
+    -r) _NEXT="_PR";;
+    -i) _NEXT="_PI";;
+    -f) _NEXT="_PF"
+		_PF="," #default value; if "-f" argument is provided, the default value is set to make sure that it is in place even if user did not specify the desired delimiter
+    ;;
+	-d) _PD="1";;
+	-h) 
+		echo -e $_HELP
+		exit 0
+	;;
+	-v) 
+		echo -e $_VERSION
+		exit 0
+	;;
+    *)
+		#echo "_NEXT=" $_NEXT
+		case "$_NEXT" in
+		   _PR) _PR="$PRM"; _NEXT="";;
+		   _PI) _PI="$PRM"; _NEXT="";;
+		   _PF) _PF="$PRM"; _NEXT="";;
+		   *) _NEXT="";; #reset variable
+		esac 
+    ;;
+  esac
 done
 
 #output values of arguments in debug mode
 if [ "$_PD" == "1" ]; then
-    echo "_PR = " $_PR
-    echo "_PI = " $_PI
-    echo "_PF = " $_PF
+    echo "Report (-r): " $_PR
+    echo "Id (-i): " $_PI
+    echo "Format/Delimiter (-f):" $_PF
 fi
 
 #possible SQL scripts (metadata|dictionary|studystats)
 _QR=""
 _Q_METADATA="EXEC usp_get_metadata @study_id = {{study_id}};"
+_Q_METADATA_MULTI_IDS="EXEC usp_get_metadata_studies_combined @study_ids = '{{study_id}}';"
 _Q_DICTIONARY="EXEC usp_get_dictionary @dict_id = {{study_id}};"
 _Q_STUDYSTATS="Set nocount on; Select * from vw_get_study_stats;"
 
@@ -83,13 +112,21 @@ fi
 
 #echo "_DELIM_FMT = " $_DELIM_FMT #for testing only
 
+
 case $_PR in
-   metadata) _QR=$_Q_METADATA
-	 ;;
-   dictionary) _QR=$_Q_DICTIONARY
-	 ;;
-   studystats) _QR=$_Q_STUDYSTATS
-	 ;;
+   metadata) #_QR=$_Q_METADATA
+		#check if PI contains multiple comma separated IDs 
+		IFS=',' read -ra IDS <<< "$_PI"
+		if [ "${#IDS[@]}" -gt 1 ]
+		then
+			_QR=$_Q_METADATA_MULTI_IDS
+		else
+			_QR=$_Q_METADATA
+		fi
+   
+   ;;
+   dictionary) _QR=$_Q_DICTIONARY;;
+   studystats) _QR=$_Q_STUDYSTATS;;
    *) 
 	 #report argument was not recognized             
 	 echo "Value of the '-r' argument ('$_PR') was not recognized. Aborting execution. Check below for the help information."
@@ -101,12 +138,11 @@ esac
 #update _QR variable by substituting study_id place holder with the actual study_id supplied as a argument
 _QR=${_QR//$_PL_HLDR_STUDYID/$_PI}
 
-#output value of _QR in debug mode
-if [ "$_PD" == "1" ]; then
-    echo "_QR = " $_QR
-fi
+echo "_QR = " $_QR #for testing only
+#exit 0 #for testing only
 
-_SQLCMD='sqlcmd -S $_S -U $_U -P $_P -d $_D -Q "$_QR" $_DELIM_FMT'  # -W -w 4000 -s , #-o out/tmp_metadata_query_out.csv
+_SQLCMD='sqlcmd -S $_S -U $_U -P $_P -d $_D -Q "$_QR" $_DELIM_FMT'  # -W -w 4000 -s , 
 #echo $_SQLCMD #for testing only
 eval ${_SQLCMD} ${_RMV_2ND_LINE}
+
 
