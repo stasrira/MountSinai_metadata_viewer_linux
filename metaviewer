@@ -138,7 +138,9 @@ esac
 #update _QR variable by substituting study_id place holder with the actual study_id supplied as a argument
 _QR=${_QR//$_PL_HLDR_STUDYID/$_PI}
 
-echo "_QR = " $_QR #for testing only
+if [ "$_PD" == "1" ]; then
+	echo "_QR = " $_QR #for testing only
+fi
 #exit 0 #for testing only
 
 _SQLCMD='sqlcmd -S $_S -U $_U -P $_P -d $_D -Q "$_QR" $_DELIM_FMT'  # -W -w 4000 -s , 
