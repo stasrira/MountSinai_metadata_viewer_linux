@@ -34,6 +34,7 @@ _PR="studystats"	#default value for query name
 _PI="1"				#default value for id
 _PF="" 				#default value for a format argument; 
 _PS=","				#default separator for a delimited format;
+_PD=""
 
 #analyze received arguments
 while getopts r:i:fhvds: o
