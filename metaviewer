@@ -2,7 +2,7 @@
 set -euo pipefail
 
 #version of the script
-_VER_NUM=1.03
+_VER_NUM=1.04
 _VERSION="`basename ${0}` (version: $_VER_NUM)" 
 
 #define main variables
@@ -43,7 +43,7 @@ do
 	r) _PR="$OPTARG";;
 	i) _PI="$OPTARG";;
 	f) _PF="1";;
-	s) _PS="$OPTARG";;
+	s) _PS=\""$OPTARG"\";; #quotes with escape sign added to handle delimiter that is passed as an escape character itself (like \t)
 	d) _PD="1";;
 	v) echo -e $_VERSION
 	   exit 0;;
@@ -66,7 +66,7 @@ fi
 
 #possible SQL scripts (metadata|dictionary|studystats)
 _QR=""
-_Q_METADATA="EXEC usp_get_metadata @study_id = {{study_id}};"
+#_Q_METADATA="EXEC usp_get_metadata @study_id = {{study_id}};"
 _Q_METADATA_MULTI_IDS="EXEC usp_get_metadata_studies_combined @study_ids = '{{study_id}}';"
 _Q_DICTIONARY="EXEC usp_get_dictionary @dict_id = {{study_id}};"
 _Q_STUDYSTATS="Set nocount on; Select * from vw_get_study_stats;"
@@ -85,18 +85,17 @@ fi
 
 #echo "_DELIM_FMT = " $_DELIM_FMT #for testing only
 
-
 case $_PR in
    metadata) 
+		_QR=$_Q_METADATA_MULTI_IDS
 		#check if PI contains multiple comma separated IDs 
-		IFS=',' read -ra IDS <<< "$_PI"
-		if [ "${#IDS[@]}" -gt 1 ]
-		then #multiple IDs are present
-			_QR=$_Q_METADATA_MULTI_IDS 
-		else #only one ID is present
-			_QR=$_Q_METADATA
-		fi
-   
+		#IFS=',' read -ra IDS <<< "$_PI"
+		#if [ "${#IDS[@]}" -gt 1 ]
+		#then #multiple IDs are present
+		#	_QR=$_Q_METADATA_MULTI_IDS 
+		#else #only one ID is present
+		#	_QR=#$_Q_METADATA
+		#fi
    ;;
    dictionary) _QR=$_Q_DICTIONARY;;
    studystats) _QR=$_Q_STUDYSTATS;;
@@ -115,9 +114,13 @@ if [ "$_PD" == "1" ]; then
 	echo "SQL Query: " $_QR #output in debug mode only
 fi
 
+#combine the full sqlcmd call into a string; actual SQL query is delimited with double quotes (presented as escap characters)
+_SQLCMD="sqlcmd -S $_S -U $_U -P $_P -d $_D -Q \" $_QR \" $_DELIM_FMT"
 
-_SQLCMD='sqlcmd -S $_S -U $_U -P $_P -d $_D -Q "$_QR" $_DELIM_FMT'  # -W -w 4000 -s , 
-#echo $_SQLCMD #for testing only
-eval ${_SQLCMD} ${_RMV_2ND_LINE}
+if [ "$_PD" == "1" ]; then
+    echo "Final Command _SQLCMD = $_SQLCMD"
+fi
+
+echo "${_SQLCMD} ${_RMV_2ND_LINE}" |bash #execute sqlcmd command
 
 
