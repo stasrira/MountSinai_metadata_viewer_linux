@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 set -euo pipefail
 
 #version of the script
-_VER_NUM=1.04
+_VER_NUM=1.05
 _VERSION="`basename ${0}` (version: $_VER_NUM)" 
 
 #define main variables
