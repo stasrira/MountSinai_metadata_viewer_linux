@@ -2,7 +2,7 @@
 set -euo pipefail
 
 #version of the script
-_VER_NUM=2.00
+_VER_NUM=2.0
 _VERSION="`basename ${0}` (version: $_VER_NUM)" 
 
 #define main variables
@@ -13,6 +13,7 @@ _D=dw_motrpac			#database name
 
 _HELP="\n$_VERSION
 	\nPrerequisites: 'sqlcmd' application is required to run this script. To install 'sqlcmd', follow directions on this site: \nhttps://docs.microsoft.com/en-us/sql/linux/sql-server-linux-setup-tools?view=sql-server-2017
+	\nMore detailed documentation for this tool can be found in this google doc: \nhttps://docs.google.com/document/d/1vUB8m8K74kVogcmB7HXhR7s8OYL4xIjAFlaw6mgo74o/edit?usp=sharing
 	\n\narguments usage: 
 		\n\t[-v: report the version; if this argument is supplied, it aborts execution of the script]
 		\n\t[-h: help; if this argument is supplied, it aborts execution of the script]
@@ -24,9 +25,9 @@ _HELP="\n$_VERSION
 		\n\t\t'studystats' does not require this argument
 		\n\t\t'metadata' report can accept a comma delimited list of study_ids, sample ids, aliquot ids (depending on the value of -T parameter); 
 		\n\t\t'dictionary' report can accept only a single value]
-		\n\t[-T metadata report type: expected values: study|sample|aliquot (if '-T' is omitter, default report value is set to 'study')] 
+		\n\t[-T metadata report type: expected values: study|sample|aliquot (if '-T' is omitted, default report value is set to 'study')] 
 		\n\t[-S study id filter (optional): expects to get a single study id value (an integer) that will be applied as an additional filter for returned metadata of report types: sample, aliquot (see -T parameter for details).] 
-		\n\t[-f format (optional): sets output format to be delimited. Actual delimiter to be used will be defined by '-f' paramter (if '-f' is omitted, default delimiter is set to comma)
+		\n\t[-f format (optional): sets output format to be delimited. Actual delimiter to be used will be defined by '-f' parameter (if '-f' is omitted, default delimiter is set to comma)
 		\n\t\tIf this argument is omitted, native SQL Server output will be used]
 		\n\t[-s separator: sets delimiter character to be used when '-f' argument is provided. If this argument is omitted, default delimiter is set to comma); 
 		\n\t\taccepts one character only]
