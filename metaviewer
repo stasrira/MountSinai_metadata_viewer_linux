@@ -2,7 +2,7 @@
 set -euo pipefail
 
 #version of the script
-_VER_NUM=1.05
+_VER_NUM=2.0
 _VERSION="`basename ${0}` (version: $_VER_NUM)" 
 
 #define main variables
@@ -13,17 +13,21 @@ _D=dw_motrpac			#database name
 
 _HELP="\n$_VERSION
 	\nPrerequisites: 'sqlcmd' application is required to run this script. To install 'sqlcmd', follow directions on this site: \nhttps://docs.microsoft.com/en-us/sql/linux/sql-server-linux-setup-tools?view=sql-server-2017
+	\nMore detailed documentation for this tool can be found in this google doc: \nhttps://docs.google.com/document/d/1vUB8m8K74kVogcmB7HXhR7s8OYL4xIjAFlaw6mgo74o/edit?usp=sharing
 	\n\narguments usage: 
 		\n\t[-v: report the version; if this argument is supplied, it aborts execution of the script]
 		\n\t[-h: help; if this argument is supplied, it aborts execution of the script]
 		\n\t[-d: debug version]
 		\n\t[-r report identifier: expected values: metadata|dictionary|studystats (if '-r' is omitter, default report value is set to 'studystats')] 
-		\n\t[-i id of entity (study or dictionary id) to be supplied to selected report: numeric or comma delimited list of numeric values (if '-i' is omitter, default id value is set to 1) 
+		\n\t[-i id of entity (study id[s], dictionary id, sample id[s], aliquot id[s]) to be supplied to selected report: 
+		\n\t\tnumeric (for study and dictionary ids) or comma delimited list of values (if '-i' is omitter, default id value is set to 1) 
 		\n\t\tthis argument is required for 'metadata' and 'dictionary' reports (refer to '-r' argument); 
 		\n\t\t'studystats' does not require this argument
-		\n\t\t'metadata' report can accept a comma delimited list of study_ids; 
-		\n\t\t'dictionary' report can accept only single value]
-		\n\t[-f format (optional): sets output format to be delimited. Actual delimiter to be used will be defined by '-fd' paramter (if '-fd' is omitted, default delimiter is set to comma)
+		\n\t\t'metadata' report can accept a comma delimited list of study_ids, sample ids, aliquot ids (depending on the value of -T parameter); 
+		\n\t\t'dictionary' report can accept only a single value]
+		\n\t[-T metadata report type: expected values: study|sample|aliquot (if '-T' is omitted, default report value is set to 'study')] 
+		\n\t[-S study id filter (optional): expects to get a single study id value (an integer) that will be applied as an additional filter for returned metadata of report types: sample, aliquot (see -T parameter for details).] 
+		\n\t[-f format (optional): sets output format to be delimited. Actual delimiter to be used will be defined by '-f' parameter (if '-f' is omitted, default delimiter is set to comma)
 		\n\t\tIf this argument is omitted, native SQL Server output will be used]
 		\n\t[-s separator: sets delimiter character to be used when '-f' argument is provided. If this argument is omitted, default delimiter is set to comma); 
 		\n\t\taccepts one character only]
@@ -35,9 +39,15 @@ _PI="1"				#default value for id
 _PF="" 				#default value for a format argument; 
 _PS=","				#default separator for a delimited format;
 _PD=""
+# _PIDs=""			#default value for list of ids presenting samples or aliquots
+_PSF="-1"			#default value for study filter id
+_PIT="study"		#default value for ID Type parameter; possible values: study, sample, aliquot
+_RMV_SQL_HEADERS=""
+_RMV_2ND_LINE=""
+_DELIM_FMT=""
 
 #analyze received arguments
-while getopts r:i:fhvds: o
+while getopts r:i:fhvds:S:T: o
 do
     case "$o" in
 	r) _PR="$OPTARG";;
@@ -45,6 +55,9 @@ do
 	f) _PF="1";;
 	s) _PS=\""$OPTARG"\";; #quotes with escape sign added to handle delimiter that is passed as an escape character itself (like \t)
 	d) _PD="1";;
+	# I) _PI="$OPTARG";;
+	S) _PSF="$OPTARG";;
+	T) _PIT="$OPTARG";;
 	v) echo -e $_VERSION
 	   exit 0;;
 	h) echo -e $_HELP
@@ -62,6 +75,8 @@ if [ "$_PD" == "1" ]; then #output in debug mode only
     echo "Id (-i): " $_PI
     echo "Format (-f):" $_PF
     echo "Separator (-s):" [$_PS]
+	echo "Type of ids provided: " $_PIT
+	echo "Study filter for provided ids: " $_PSF
 fi
 
 #possible SQL scripts (metadata|dictionary|studystats)
@@ -70,8 +85,12 @@ _QR=""
 _Q_METADATA_MULTI_IDS="EXEC usp_get_metadata_studies_combined @study_ids = '{{study_id}}';"
 _Q_DICTIONARY="EXEC usp_get_dictionary @dict_id = {{study_id}};"
 _Q_STUDYSTATS="Set nocount on; Select * from vw_get_study_stats;"
+_Q_METADATA_SAMPLES="EXEC usp_get_metadata_by_sampleids @sids = '{{sample_ids}}', @study_id = '{{study_id}}', @show_dataset_separators = 1, @output_headers_as_dataset = 1;"
+_Q_METADATA_ALIQUOTS="EXEC usp_get_metadata_by_aliquotids @alids = '{{aliquot_ids}}', @study_id = '{{study_id}}', @show_dataset_separators = 1, @output_headers_as_dataset = 1;"
 
 _PL_HLDR_STUDYID="{{study_id}}"
+_PL_HLDR_SAMPLEIDS="{{sample_ids}}"
+_PL_HLDR_ALIQUOTIDS="{{aliquot_ids}}"
 
 #controls format of the output
 if [ "$_PF" != "" ]
@@ -87,7 +106,28 @@ fi
 
 case $_PR in
    metadata) 
-		_QR=$_Q_METADATA_MULTI_IDS
+		case $_PIT in
+			study)
+				_QR=$_Q_METADATA_MULTI_IDS
+				_RMV_SQL_HEADERS=""
+				;;
+			sample)
+				_QR=$_Q_METADATA_SAMPLES
+				_RMV_SQL_HEADERS="-h -1" # set removing headers from output datasets (headers added as an additional dataset before the main output in the SQL stored procedure)
+				_RMV_2ND_LINE="" # overwrite previosly assigned value for the current case
+				;;
+			aliquot)
+				_QR=$_Q_METADATA_ALIQUOTS
+				_RMV_SQL_HEADERS="-h -1" # set removing headers from output datasets (headers added as an additional dataset before the main output in the SQL stored procedure)
+				_RMV_2ND_LINE="" # overwrite previosly assigned value for the current case
+				;;
+			*)
+				#report argument was not recognized             
+				echo "Value of the '-T' argument ('$_PSF') was not recognized. Aborting execution. Check below for the help information."
+				echo -e $_HELP
+				exit 0
+				;;
+		esac
 		#check if PI contains multiple comma separated IDs 
 		#IFS=',' read -ra IDS <<< "$_PI"
 		#if [ "${#IDS[@]}" -gt 1 ]
@@ -100,27 +140,43 @@ case $_PR in
    dictionary) _QR=$_Q_DICTIONARY;;
    studystats) _QR=$_Q_STUDYSTATS;;
    *) 
-	 #report argument was not recognized             
-	 echo "Value of the '-r' argument ('$_PR') was not recognized. Aborting execution. Check below for the help information."
-	 echo -e $_HELP
-	 exit 0
-	 ;;
+		#report argument was not recognized             
+		echo "Value of the '-r' argument ('$_PR') was not recognized. Aborting execution. Check below for the help information."
+		echo -e $_HELP
+		exit 0
+		;;
 esac 
 
-#update _QR variable by substituting study_id place-holder with the actual study_id supplied as an argument
-_QR=${_QR//$_PL_HLDR_STUDYID/$_PI}
+case $_PIT in
+	study)
+		#update _QR variable by substituting study_id place-holder with the actual study_id supplied as an argument
+		_QR=${_QR//$_PL_HLDR_STUDYID/$_PI};;
+	sample)
+		#update _QR variable by substituting sample ids place-holder with the actual sample ids supplied as an argument
+		_QR=${_QR//$_PL_HLDR_SAMPLEIDS/$_PI}
+		#update _QR variable by substituting study id filter place-holder with the actual study_id supplied as an argument
+		_QR=${_QR//$_PL_HLDR_STUDYID/$_PSF};;
+	aliquot)
+		#update _QR variable by substituting aliquot ids place-holder with the actual sample ids supplied as an argument
+		_QR=${_QR//$_PL_HLDR_ALIQUOTIDS/$_PI}
+		#update _QR variable by substituting study id filter place-holder with the actual study_id supplied as an argument
+		_QR=${_QR//$_PL_HLDR_STUDYID/$_PSF};;
+esac
 
 if [ "$_PD" == "1" ]; then
 	echo "SQL Query: " $_QR #output in debug mode only
 fi
 
 #combine the full sqlcmd call into a string; actual SQL query is delimited with double quotes (presented as escap characters)
-_SQLCMD="sqlcmd -S $_S -U $_U -P $_P -d $_D -Q \" $_QR \" $_DELIM_FMT"
+_SQLCMD="sqlcmd -S $_S -U $_U -P $_P -d $_D -Q \" $_QR \" $_DELIM_FMT $_RMV_SQL_HEADERS " # -h-1
 
 if [ "$_PD" == "1" ]; then
     echo "Final Command _SQLCMD = $_SQLCMD"
 fi
 
+# echo ${_RMV_2ND_LINE}
+
 echo "${_SQLCMD} ${_RMV_2ND_LINE}" |bash #execute sqlcmd command
+
 
 
