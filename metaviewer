@@ -2,7 +2,7 @@
 set -euo pipefail
 
 #version of the script
-_VER_NUM=2.0
+_VER_NUM=2.1
 _VERSION="`basename ${0}` (version: $_VER_NUM)" 
 
 #define main variables
@@ -40,7 +40,7 @@ _PF="" 				#default value for a format argument;
 _PS=","				#default separator for a delimited format;
 _PD=""
 # _PIDs=""			#default value for list of ids presenting samples or aliquots
-_PSF="-1"			#default value for study filter id
+_PSF=""			#default value for study filter id
 _PIT="study"		#default value for ID Type parameter; possible values: study, sample, aliquot
 _RMV_SQL_HEADERS=""
 _RMV_2ND_LINE=""
@@ -86,7 +86,7 @@ _Q_METADATA_MULTI_IDS="EXEC usp_get_metadata_studies_combined @study_ids = '{{st
 _Q_DICTIONARY="EXEC usp_get_dictionary @dict_id = {{study_id}};"
 _Q_STUDYSTATS="Set nocount on; Select * from vw_get_study_stats;"
 _Q_METADATA_SAMPLES="EXEC usp_get_metadata_by_sampleids @sids = '{{sample_ids}}', @study_id = '{{study_id}}', @show_dataset_separators = 1, @output_headers_as_dataset = 1;"
-_Q_METADATA_ALIQUOTS="EXEC usp_get_metadata_by_aliquotids @alids = '{{aliquot_ids}}', @study_id = '{{study_id}}', @show_dataset_separators = 1, @output_headers_as_dataset = 1;"
+_Q_METADATA_ALIQUOTS="EXEC usp_get_metadata_by_aliquotids @alids = '{{aliquot_ids}}', @study_ids = '{{study_id}}', @show_dataset_separators = 1, @output_headers_as_dataset = 1;"
 
 _PL_HLDR_STUDYID="{{study_id}}"
 _PL_HLDR_SAMPLEIDS="{{sample_ids}}"
