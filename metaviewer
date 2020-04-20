@@ -20,13 +20,14 @@ _HELP="\n$_VERSION
 		\n\t[-d: debug version]
 		\n\t[-r report identifier: expected values: metadata|dictionary|studystats (if '-r' is omitter, default report value is set to 'studystats')] 
 		\n\t[-i id of entity (study id[s], dictionary id, sample id[s], aliquot id[s]) to be supplied to selected report: 
-		\n\t\tnumeric (for study and dictionary ids) or comma delimited list of values (if '-i' is omitter, default id value is set to 1) 
+		\n\t\tnumeric (for study and dictionary ids) or comma delimited list of values 
+		\n\t\tif '-i' is omitter, default value is set to blank '', which will be considered by the database procedure as return all available records, if '-T' parameter is set to 'sample' or 'aliquot' 
 		\n\t\tthis argument is required for 'metadata' and 'dictionary' reports (refer to '-r' argument); 
 		\n\t\t'studystats' does not require this argument
 		\n\t\t'metadata' report can accept a comma delimited list of study_ids, sample ids, aliquot ids (depending on the value of -T parameter); 
 		\n\t\t'dictionary' report can accept only a single value]
 		\n\t[-T metadata report type: expected values: study|sample|aliquot (if '-T' is omitted, default report value is set to 'study')] 
-		\n\t[-S study id filter (optional): expects to get a single study id value (an integer) that will be applied as an additional filter for returned metadata of report types: sample, aliquot (see -T parameter for details).] 
+		\n\t[-S study id filter (optional): expects to get a single or comma delimited list of study ids that will be applied as an additional filter for returned metadata of report types: sample, aliquot (see -T parameter for details).] 
 		\n\t[-f format (optional): sets output format to be delimited. Actual delimiter to be used will be defined by '-f' parameter (if '-f' is omitted, default delimiter is set to comma)
 		\n\t\tIf this argument is omitted, native SQL Server output will be used]
 		\n\t[-s separator: sets delimiter character to be used when '-f' argument is provided. If this argument is omitted, default delimiter is set to comma); 
@@ -35,7 +36,7 @@ _HELP="\n$_VERSION
 
 #set default values
 _PR="studystats"	#default value for query name
-_PI="1"				#default value for id
+_PI=""				#default value for id
 _PF="" 				#default value for a format argument; 
 _PS=","				#default separator for a delimited format;
 _PD=""
@@ -85,7 +86,7 @@ _QR=""
 _Q_METADATA_MULTI_IDS="EXEC usp_get_metadata_studies_combined @study_ids = '{{study_id}}';"
 _Q_DICTIONARY="EXEC usp_get_dictionary @dict_id = {{study_id}};"
 _Q_STUDYSTATS="Set nocount on; Select * from vw_get_study_stats;"
-_Q_METADATA_SAMPLES="EXEC usp_get_metadata_by_sampleids @sids = '{{sample_ids}}', @study_id = '{{study_id}}', @show_dataset_separators = 1, @output_headers_as_dataset = 1;"
+_Q_METADATA_SAMPLES="EXEC usp_get_metadata_by_sampleids @sids = '{{sample_ids}}', @study_ids = '{{study_id}}', @show_dataset_separators = 1, @output_headers_as_dataset = 1;"
 _Q_METADATA_ALIQUOTS="EXEC usp_get_metadata_by_aliquotids @alids = '{{aliquot_ids}}', @study_ids = '{{study_id}}', @show_dataset_separators = 1, @output_headers_as_dataset = 1;"
 
 _PL_HLDR_STUDYID="{{study_id}}"
